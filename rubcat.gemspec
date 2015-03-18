@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["s@polamjag.info"]
 
   spec.summary       = %q{pidcat, pretty adb logcat in Ruby}
+  spec.description   = %q{pidcat, pretty adb logcat in Ruby. without any dependencies. can be installed and updated with gem command!}
   spec.homepage      = "https://github.com/rubcat"
   spec.license       = "MIT"
 
