@@ -58,13 +58,14 @@ class PrettyLogcat
   end
 
   def colorize_type(type)
-    if type == "V"
+    case type
+    when "V"
       " #{type} ".bold.bg_gray.black
-    elsif type == "D"
+    when "D"
       " #{type} ".bold.bg_blue
-    elsif type == "I"
+    when "I"
       " #{type} ".bold.bg_green
-    elsif type == "W"
+    when "W"
       " #{type} ".bold.bg_brown
     else
       " #{type} ".bold.bg_red
