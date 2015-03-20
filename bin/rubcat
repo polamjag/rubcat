@@ -4,6 +4,8 @@ require 'pty'
 
 cmd = "adb logcat"
 
+# -d to print and exit
+
 class String
   # http://stackoverflow.com/questions/1489183/colorized-ruby-output
   def black;          "\033[30m#{self}\033[0m" end
@@ -24,34 +26,95 @@ class String
   def bg_gray;        "\033[47m#{self}\033[0m" end
   def bold;           "\033[1m#{self}\033[22m" end
   def reverse_color;  "\033[7m#{self}\033[27m" end
+
+  def randomize_color
+    "\033[3#{self.hash % 6 + 1}m#{self}\033[0m"
+  end
+
+  def trim_and_rjust(len)
+    if self.length > len
+      self[-len .. -1]
+    else
+      self.rjust len
+    end
+  end
 end
 
-def parse_message(mes)
-  {
-    type: mes.match('^[VDIWEFS]').to_s,
-    tag: mes.match('^./([^(\s]*)')[1],
-    pid: mes.match('^[^(]*\(\s*([0-9]+)\)')[1],
-    message: mes.match("^[^:]+:\s*(.*)$")[1]
-  }
+
+class PrettyLogcat
+  attr_reader :last_tag, :tag_length
+  def initialize(tag_length=30)
+    @tag_length = tag_length
+  end
+
+  def parse_message(mes)
+    {
+      type: mes.match('^[VDIWEFS]').to_s,
+      # tag: mes.match('^./([^(\s]*)')[1],
+      tag: mes.match('^./(.*)\(\s*[0-9]+\):')[1].strip,
+      pid: mes.match('^[^(]*\(\s*([0-9]+)\)')[1],
+      message: mes.match("^[^:]+:\s*(.*)$")[1]
+    }
+  end
+
+  def colorize_type(type)
+    case type
+    when "V"
+      " #{type} ".bold.bg_gray.black
+    when "D"
+      " #{type} ".bold.bg_blue
+    when "I"
+      " #{type} ".bold.bg_green
+    when "W"
+      " #{type} ".bold.bg_brown
+    else
+      " #{type} ".bold.bg_red
+    end
+  end
+
+  KNOWN_TAGS = %w{dalvikvm art dex2oat}
+
+  def format_tag(tag)
+    unless tag == @last_tag
+      @last_tag = tag
+      # puts # separate messages
+      if KNOWN_TAGS.include? tag
+        tag.trim_and_rjust(@tag_length).bold.black.bg_gray
+      else
+        tag.trim_and_rjust(@tag_length).randomize_color.bold
+      end
+    else
+      " " * @tag_length
+    end
+  end
+
+  def pretty_print(mes)
+    buf = format_tag mes[:tag]
+
+    buf += " "
+    buf += colorize_type mes[:type]
+    buf += " "
+    buf += mes[:message]
+    puts buf
+  end
+
+  def echo(mes)
+    pretty_print parse_message mes
+  end
 end
 
-def pretty_print(mes)
-  print mes[:tag].rjust(30)
-  print " "
-  print (" " + mes[:type] + " ").bold.bg_red + " "
-  print mes[:message]
-  puts
-end
+pl = PrettyLogcat.new 25
 
 begin
   PTY.spawn cmd do |stdout, stdin, pid|
     begin
-      # parse output
+      # parse and print output
       stdout.each do |line|
         begin
-          pretty_print parse_message line
+          pl.echo line
         rescue => e
-          p e
+          puts e
+          puts line
         end
       end
     rescue Errno::EIO
