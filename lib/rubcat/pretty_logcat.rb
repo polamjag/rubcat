@@ -1,9 +1,13 @@
 module Rubcat
   class PrettyLogcat
-    attr_reader :last_tag, :tag_length
+    attr_reader :opt, :last_tag
 
-    def initialize(tag_length=25)
-      @tag_length = tag_length
+    def initialize(options)
+      @opt = {
+        min_level: :V,
+        tag_length: 25,
+        split_tags: false
+      }.merge options
     end
 
     def parse_message(mes)
@@ -35,14 +39,14 @@ module Rubcat
     def format_tag(tag)
       unless tag == @last_tag
         @last_tag = tag
-        # puts # separate messages
+        puts if @opt[:split_tags]
         if KNOWN_TAGS.include? tag
-          tag.trim_and_rjust(@tag_length).bold.black.bg_gray
+          tag.trim_and_rjust(@opt[:tag_length]).bold.black.bg_gray
         else
-          tag.trim_and_rjust(@tag_length).randomize_color.bold
+          tag.trim_and_rjust(@opt[:tag_length]).randomize_color.bold
         end
       else
-        " " * @tag_length
+        " " * @opt[:tag_length]
       end
     end
 

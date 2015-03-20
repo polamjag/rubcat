@@ -1,47 +1,32 @@
 #!/usr/bin/env ruby
 
 require 'pty'
-require 'rubcat/prettylogcat'
+require 'optparse'
+
+require 'rubcat'
 
 cmd = "adb logcat"
 
-# -d to print and exit
+opt = OptionParser.new
 
-class String
-  # http://stackoverflow.com/questions/1489183/colorized-ruby-output
-  def black;          "\033[30m#{self}\033[0m" end
-  def red;            "\033[31m#{self}\033[0m" end
-  def green;          "\033[32m#{self}\033[0m" end
-  def brown;          "\033[33m#{self}\033[0m" end
-  def blue;           "\033[34m#{self}\033[0m" end
-  def magenta;        "\033[35m#{self}\033[0m" end
-  def cyan;           "\033[36m#{self}\033[0m" end
-  def gray;           "\033[37m#{self}\033[0m" end
-  def bg_black;       "\033[40m#{self}\033[0m" end
-  def bg_red;         "\033[41m#{self}\033[0m" end
-  def bg_green;       "\033[42m#{self}\033[0m" end
-  def bg_brown;       "\033[43m#{self}\033[0m" end
-  def bg_blue;        "\033[44m#{self}\033[0m" end
-  def bg_magenta;     "\033[45m#{self}\033[0m" end
-  def bg_cyan;        "\033[46m#{self}\033[0m" end
-  def bg_gray;        "\033[47m#{self}\033[0m" end
-  def bold;           "\033[1m#{self}\033[22m" end
-  def reverse_color;  "\033[7m#{self}\033[27m" end
+OPTS = {}
 
-  def randomize_color
-    "\033[3#{self.hash % 6 + 1}m#{self}\033[0m"
+opt.on('-d') { |v| cmd << " -d" }
+opt.on('-l {V,D,I,W,E,F}', '--level={V,D,I,W,E,F}', 'Minimul level to display') { |v|
+  if %w{V D I W E F}.include? v
+    OPTS[:min_level] = v.to_sym
+  else
+    raise OptionParser::ParseError, "Invalid choice: 'A' (choose from 'V', 'D', 'I', 'W', 'E', 'F')"
   end
+}
+opt.on('-s DEVICE_SERIAL', '--serial=DEVICE_SERIAL') { |v| cmd << " -s #{v}" }
+opt.on('-d', 'Use first device for log input (adb -d option)') { |v| cmd << " -d" }
+opt.on('-e', 'Use first emulator for log input (adb -e option)') { |v| cmd << " -e" }
+opt.on('--tag-length=LENGTH', 'Length of tag shown in left of screen (default is 25)') { |v| OPTS[:tag_length] = Integer(v) }
+opt.on('--split-tags', 'Insert empty line between tags') { |v| OPTS[:split_tags] = true }
+opt.parse!
 
-  def trim_and_rjust(len)
-    if self.length > len
-      self[-len .. -1]
-    else
-      self.rjust len
-    end
-  end
-end
-
-pl = Rubcat::PrettyLogcat.new
+pl = Rubcat::PrettyLogcat.new OPTS
 
 begin
   PTY.spawn cmd do |stdout, stdin, pid|
@@ -55,9 +40,9 @@ begin
         end
       end
     rescue Errno::EIO
-      puts "Errno:EIO error, but this probably just means that the process has finished giving output"
+      puts "Errno:EIO"
     end
   end
 rescue PTY::ChildExited
-  puts "The child process exited!"
+  puts "PTY::ChildExited"
 end
