@@ -25,7 +25,7 @@ class String
 
   def trim_and_rjust(len)
     if self.length > len
-      self[-len .. -1]
+      self[0 .. (len/2 - 2)] + ".." + self[-(len/2) .. -1]
     else
       self.rjust len
     end
