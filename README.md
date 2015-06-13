@@ -1,5 +1,7 @@
 # rubcat
 
+[![Gem Version](https://badge.fury.io/rb/rubcat.svg)](http://badge.fury.io/rb/rubcat)
+
 ![screenshot](screenshot.png)
 
 simply pidcat in Ruby.
