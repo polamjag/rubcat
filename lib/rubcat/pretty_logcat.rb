@@ -10,12 +10,13 @@ module Rubcat
       }.merge options
     end
 
-    def parse_message(mes)
+    def parse_message(message)
+      m = message.match(/^([VDIWEFS])\/(.*)\((\s*[0-9]+)\):\s(.*)$/)
       {
-        type: mes.match(/^[VDIWEFS]/).to_s,
-        tag: mes.match(/^.\/(.*)\(\s*[0-9]+\):/)[1].strip,
-        pid: mes.match(/\(\s*([0-9]+)\):/)[1],
-        message: mes.match(/\(\s*[0-9]+\):\s(.*)/)[1]
+        type: m[1],
+        tag: m[2].strip,
+        pid: m[3],
+        message: m[4]
       }
     end
 
