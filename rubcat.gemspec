@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{pidcat, pretty adb logcat in Ruby}
   spec.description   = %q{pidcat, pretty adb logcat in Ruby. without any dependencies. can be installed and updated with gem command!}
-  spec.homepage      = "https://github.com/rubcat"
+  spec.homepage      = "https://github.com/polamjag/rubcat"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
