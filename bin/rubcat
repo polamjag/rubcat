@@ -28,6 +28,8 @@ opt.parse!
 
 pl = Rubcat::PrettyLogcat.new OPTS
 
+$PROGRAM_NAME = 'rubcat'
+
 begin
   PTY.spawn cmd do |stdout, stdin, pid|
     begin
