@@ -38,7 +38,7 @@ module Rubcat
       end
     end
 
-    KNOWN_TAGS = %w{dalvikvm art dex2oat}
+    KNOWN_TAGS = %w{dalvikvm dalvikvm-heap art dex2oat}
 
     def format_tag(type, tag)
       if type == :normal
