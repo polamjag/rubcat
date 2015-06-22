@@ -18,7 +18,7 @@ opt.on('-l {V,D,I,W,E,F}', '--level={V,D,I,W,E,F}', 'Minimul level to display') 
   if %w{V D I W E F}.include? v
     OPTS[:min_level] = v.to_sym
   else
-    raise OptionParser::ParseError, "Invalid choice: 'A' (choose from 'V', 'D', 'I', 'W', 'E', 'F')"
+    raise OptionParser::ParseError, "Invalid choice: #{v} (choose from 'V', 'D', 'I', 'W', 'E', 'F')"
   end
 }
 opt.on('-s DEVICE_SERIAL', '--serial=DEVICE_SERIAL') { |v| flags << " -s #{v}" }
@@ -42,6 +42,7 @@ begin
           pl.echo line
         rescue => e
           puts line
+          puts e if ENV["DEBUG"]
         end
       end
     rescue Errno::EIO
