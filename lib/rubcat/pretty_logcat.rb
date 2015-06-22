@@ -1,3 +1,5 @@
+require 'io/console'
+
 module Rubcat
   class PrettyLogcat
     attr_reader :opt, :last_tag
@@ -51,14 +53,13 @@ module Rubcat
       end
     end
 
-    def prettify(mes)
-      buf = format_tag mes[:tag]
+    def wrap_message(mes, type)
+      mes.scan(/.{1,#{IO.console.winsize[1] - @opt[:tag_length] - 5}}/).join("\n#{' ' * @opt[:tag_length]} #{type} ")
+    end
 
-      buf += " "
-      buf += colorize_type mes[:type]
-      buf += " "
-      buf += mes[:message]
-      buf
+    def prettify(mes)
+      type = colorize_type mes[:type]
+      "#{format_tag mes[:tag]} #{type} #{wrap_message mes[:message], type}"
     end
 
     def echo(mes)
