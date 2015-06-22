@@ -3,6 +3,7 @@ require 'io/console'
 module Rubcat
   class PrettyLogcat
     attr_reader :opt, :last_tag
+    LOG_LEVELS = [:V, :D, :I, :W, :E, :F]
 
     def initialize(options)
       @opt = {
@@ -15,7 +16,7 @@ module Rubcat
     def parse_message(message)
       m = message.match(/^([VDIWEFS])\/(.*)\((\s*[0-9]+)\):\s(.*)$/)
       {
-        type: m[1],
+        type: m[1].to_sym,
         tag: m[2].strip,
         pid: m[3],
         message: m[4]
@@ -24,13 +25,13 @@ module Rubcat
 
     def colorize_type(type)
       case type
-      when "V"
+      when :V
         " #{type} ".bold.bg_gray.black
-      when "D"
+      when :D
         " #{type} ".bold.bg_blue
-      when "I"
+      when :I
         " #{type} ".bold.bg_green
-      when "W"
+      when :W
         " #{type} ".bold.bg_brown
       else
         " #{type} ".bold.bg_red
@@ -67,6 +68,8 @@ module Rubcat
     end
 
     def pretty_print(mes)
+      return if (LOG_LEVELS.find_index @opt[:min_level]) > (LOG_LEVELS.find_index mes[:type])
+
       type = colorize_type mes[:type]
 
       if mes[:tag] == "ActivityManager"
