@@ -12,6 +12,7 @@ opt = OptionParser.new
 
 OPTS = {}
 
+opt.version = Rubcat::VERSION
 opt.on('-d') { |v| flags << " -d" }
 opt.on('-l {V,D,I,W,E,F}', '--level={V,D,I,W,E,F}', 'Minimul level to display') { |v|
   if %w{V D I W E F}.include? v
